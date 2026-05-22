@@ -36,6 +36,32 @@ def test_add_new_user(setup_database, connection):
     user = cursor.fetchone()
     assert user, "Пользователь должен быть добавлен в базу данных."
 
+def test_authinticate_user_success(setup_database):
+    """Тест успешной аутентификации пользователя."""
+    add_user('cat', 'authuser@example.com', '12345')
+    assert authenticate_user('cat', '12345'), "Пользователь должен быть успешно аутентифицирован."
+
+def test_display_users(setup_database, connection):
+    """Тест отображения списка пользователей."""
+    add_user('pop','pop@example.com', '12345')
+    cursor = connection.cursor()
+    cursor.execute("SELECT username, email FROM users;")
+    users = cursor.fetchall()
+    assert users, "Список пользователей не должен быть пустым."
+
+def test_user_choice_invalid_input(monkeypatch):
+    """Тест обработки неверного ввода при выборе действия."""
+    from registration.registration import user_choice
+    
+    # 1. Simulate the user typing '3' (an invalid input)
+    monkeypatch.setattr('builtins.input', lambda _: '3')
+    
+    # 2. Call the function (it will automatically use '3' instead of pausing)
+    choice = user_choice()
+    
+    # 3. Assert that the choice is indeed invalid (not '1' or '2')
+    assert choice not in ['1', '2'], "Выбор не должен быть 1 или 2, если ввод неверный."
+
 # Возможные варианты тестов:
 """
 Тест добавления пользователя с существующим логином.
